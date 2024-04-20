@@ -14,7 +14,7 @@ atomic<bool> flag(false);
 
 random_device rd;
 mt19937 gen(rd());
-uniform_int_distribution<int> dis_delay(8,10);
+uniform_int_distribution<int> dis_delay(1,2);
 
 
 // Struktura reprezentująca kolor w formacie RGB
@@ -416,7 +416,8 @@ void addCarThread(vector<thread>& carThreads, vector<Car>& cars) {
         
         carThreads.emplace_back(&Car::drive, ref(cars[itr]));
 
-        mtx.lock();
+
+        mtx.lock(); 
         itr++;
         mtx.unlock();
 
@@ -473,7 +474,7 @@ int main() {
         car1.draw();
         car2.draw();
         car3.draw();
-         c.drawCar();
+        c.drawCar();
         glfwSwapBuffers(window);
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
              cout << "Space key pressed. Stopping...\n";
