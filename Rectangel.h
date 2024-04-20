@@ -7,6 +7,7 @@
 
 class Rectangel {
 private:
+    bool horizontal;
     float height = 0.05f;
     float width = 0.05f;
     bool stop = false;
@@ -20,7 +21,7 @@ private:
 public:
     float x;
     float y;
-    Rectangel(float theX, float theY, float speed,  Color color);
+    Rectangel(bool horizontal, float theX, float theY, float speed,  Color color);
 
     static std::vector<Rectangel*> objects; 
 

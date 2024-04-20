@@ -13,7 +13,7 @@ bool stopFlag = false;
 
 std::vector<Rectangel*> Rectangel::objects;
 
-Rectangel::Rectangel(float theX, float theY, float theSpeed, Color theColor) : x(theX), y(theY), speed(theSpeed), color(theColor) {}
+Rectangel::Rectangel(bool theHorizontal, float theX, float theY, float theSpeed, Color theColor) : horizontal(theHorizontal), x(theX), y(theY), speed(theSpeed), color(theColor) {}
 
 float Rectangel::random_speed(float min_speed, float max_speed){
     // Inicjalizacja generatora liczb losowych
@@ -51,7 +51,7 @@ void Rectangel::moveRight() {
         if (this == next) continue;
         float diff_x = next->x - this->x;
         float diff_y = next->y - this->y;
-        if (diff_x >= 0.0f && diff_x <= 0.1f && diff_y >=-0.05f && diff_y <=0.05f) {
+        if (diff_x >= 0.0f && diff_x <= 0.2f && diff_y >=-0.05f && diff_y <=0.05f) {
             return;
         }
     }
@@ -63,7 +63,7 @@ void Rectangel::moveLeft() {
         if (this == next) continue;
         float diff_x = next->x - this->x;
         float diff_y = next->y - this->y;
-        if (diff_x <=  0.0f && diff_x >= -0.1f && diff_y <= 0.05f && diff_y >= -0.05f) {
+        if (diff_x <=  0.0f && diff_x >= -0.2f && diff_y <= 0.05f && diff_y >= -0.05f) {
             return;
         }
     }
@@ -75,7 +75,7 @@ void Rectangel::moveUp() {
         if (this == next) continue;
         float diff_x = next->x - this->x;
         float diff_y = next->y - this->y;
-        if (diff_y >=  0.0f && diff_y <= 0.1f && diff_x <=  0.05f && diff_x >= -0.05f) {
+        if (diff_y >=  0.0f && diff_y <= 0.2f && diff_x <=  0.07f && diff_x >= -0.07f) {
            return;
         }
     }
@@ -87,7 +87,7 @@ void Rectangel::moveDown() {
         if (this == next) continue;
         float diff_x = next->x - this->x;
         float diff_y = next->y - this->y;
-        if (diff_y <=  0.0f && diff_y >= -0.1f && diff_x >= -0.05f && diff_x <= 0.05f) {
+        if (diff_y <=  0.0f && diff_y >= -0.2f && diff_x >= -0.07f && diff_x <= 0.07f) {
             return;
         }
     }
@@ -96,24 +96,39 @@ void Rectangel::moveDown() {
 
 void Rectangel::move() {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    while (life != 0 && !stopFlag) {
-        if (x <= 0.6f && y >= 0.50f && !stop) {
-            moveRight();
-            lifeDecreased = true;
-        } else if (x >= 0.6f && y >= -0.50f && !stop) {
-            moveDown();
-        } else if (x >= -0.6f && y <= -0.50f&& !stop) {
-            moveLeft();
-        } else if (x <= -0.6f && y <= 0.50f && !stop) {
-            moveUp();
-            if (lifeDecreased) {
-                lifeDecreased = false;
-                life--;
+    if(this->horizontal){
+        while (life != 0 && !stopFlag) {
+            if (x <= 0.6f && y >= 0.50f && !stop) {
+                moveRight();
+                lifeDecreased = true;
+            } else if (x >= 0.6f && y >= -0.50f && !stop) {
+                moveDown();
+            } else if (x >= -0.6f && y <= -0.50f&& !stop) {
+                moveLeft();
+            } else if (x <= -0.6f && y <= 0.50f && !stop) {
+                moveUp();
+                if (lifeDecreased) {
+                    lifeDecreased = false;
+                    life--;
+                }
             }
+            stop = false;
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
         }
-        stop = false;
-        
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    }else{ //-0.2f,0.75f
+         while(!stopFlag){
+            if (x <= 0.25f && y >= 0.75f && !stop) {
+                moveRight();
+            } else if (x >= 0.25f && y >= -0.75f && !stop) {
+                moveDown();
+            } else if (x >= -0.25f && y <= -0.75f&& !stop) {
+                moveLeft();
+            } else if (x <= -0.25f && y <= 0.75f && !stop) {
+                moveUp();
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
+         }
     }
 
     auto it = find(objects.begin(), objects.end(), this);
@@ -182,7 +197,7 @@ vector<thread> threads;
 void addNewThread(){
     while (!stopFlag)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(random_time_in_seconds(5,6)));
+        std::this_thread::sleep_for(std::chrono::seconds(random_time_in_seconds(3,5)));
 
         // Sprawdź, czy którykolwiek obiekt znajduje się w określonym przedziale x
         bool objectInRange = false;
@@ -195,7 +210,7 @@ void addNewThread(){
 
         // Dodaj nowy wątek tylko jeśli nie ma obiektu w określonym przedziale x
         if (!objectInRange) {
-            Rectangel* rec = new Rectangel(-0.80f, 0.5f, Rectangel::random_speed(0.001f, 0.01f), Color::random_color());
+            Rectangel* rec = new Rectangel(true,-0.80f, 0.5f, Rectangel::random_speed(0.001f, 0.01f), Color::random_color());
             threads.emplace_back(&Rectangel::move, rec);
             Rectangel::objects.push_back(rec);
         }
@@ -207,13 +222,27 @@ void addNewThread(){
 void render(){
 
     drawScene();
-    if(!Rectangel::objects.empty()){
-        cout << Rectangel::objects.front()->y<<endl;
-    }
+    
     for( auto& obj : Rectangel::objects){
         obj->draw();
 
     }
+
+}
+
+void createVerticalCar(){
+
+    Rectangel* rec1 = new Rectangel(false, -0.2f,0.75f,0.01f,Color::random_color());
+    Rectangel* rec2 = new Rectangel(false, -0.1f,0.75f,0.01f,Color::random_color());
+    Rectangel* rec3 = new Rectangel(false, -0.0f,0.75f,0.01f,Color::random_color());
+
+    Rectangel::objects.push_back(rec1);
+    Rectangel::objects.push_back(rec2);
+    Rectangel::objects.push_back(rec3);
+
+    threads.emplace_back(&Rectangel::move, rec1);
+    threads.emplace_back(&Rectangel::move, rec2);
+    threads.emplace_back(&Rectangel::move, rec3);
 
 }
 
@@ -240,13 +269,13 @@ int main() {
 
     thread main_thread(addNewThread);
 
+    createVerticalCar();
+
     // Pętla główna programu
     while (!glfwWindowShouldClose(window)) {
         // Wyczyszczenie bufora koloru
         glClear(GL_COLOR_BUFFER_BIT);
-        
         render();
-        
         // Wyświetlenie na ekranie
         glfwSwapBuffers(window);
 
