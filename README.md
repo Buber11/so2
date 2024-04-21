@@ -1,1 +1,1 @@
-# so2 pwr shit
+# so2 pwr thing
